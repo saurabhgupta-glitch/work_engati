@@ -6,6 +6,7 @@ import certifi
 from langchain_mongodb import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
 from pymongo import MongoClient
+from pymongo.collection import Collection
 
 from app.core.config import get_settings
 
@@ -16,7 +17,16 @@ def _get_embeddings(model_name: str) -> OpenAIEmbeddings:
 
     `OPENAI_API_KEY` should be loaded at app startup (see `main.py`).
     """
-    return OpenAIEmbeddings(model=model_name)
+    settings = get_settings()
+    return OpenAIEmbeddings(model=model_name, api_key=settings.openai_api_key)
+
+
+@lru_cache(maxsize=1)
+def get_embeddings() -> OpenAIEmbeddings:
+    """Return a cached embeddings instance based on Settings."""
+
+    settings = get_settings()
+    return _get_embeddings(settings.embeddings_model_name)
 
 
 @lru_cache(maxsize=1)
@@ -36,12 +46,10 @@ def get_vector_store() -> MongoDBAtlasVectorSearch:
 
     settings = get_settings()
 
-    client = get_mongo_client()
-    db = client[settings.mongodb_db_name]
-    collection = db[settings.mongodb_collection_name]
+    collection = get_mongo_collection()
 
     # If you want a different OpenAI embedding model, set it in Settings.
-    embeddings = _get_embeddings(settings.embeddings_model_name)
+    embeddings = get_embeddings()
 
     return MongoDBAtlasVectorSearch(
         collection=collection,
@@ -50,3 +58,12 @@ def get_vector_store() -> MongoDBAtlasVectorSearch:
         text_key=settings.text_key,
         embedding_key=settings.embedding_key,
     )
+
+
+@lru_cache(maxsize=1)
+def get_mongo_collection() -> Collection:
+    """Return the configured MongoDB collection."""
+
+    settings = get_settings()
+    client = get_mongo_client()
+    return client[settings.mongodb_db_name][settings.mongodb_collection_name]

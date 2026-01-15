@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from pymongo.errors import ServerSelectionTimeoutError
 
 from app.docs.schemas import DocSearchRequest, DocSearchResponse
-from app.docs.service import fetch_top_docs_markdown
+from app.docs.service import fetch_top_docs
 
 
 router = APIRouter(prefix="/docs", tags=["docs"])
@@ -13,8 +13,8 @@ router = APIRouter(prefix="/docs", tags=["docs"])
 @router.post("/search", response_model=DocSearchResponse)
 def search_docs(payload: DocSearchRequest) -> DocSearchResponse:
     try:
-        markdown = fetch_top_docs_markdown(payload.user_input, k=3)
-        return DocSearchResponse(markdown=markdown)
+        docs = fetch_top_docs(payload.user_input, k=2)
+        return DocSearchResponse(docs)
     except Exception as exc:
         # Don't leak internal stacktraces to clients.
         if isinstance(exc, ServerSelectionTimeoutError):

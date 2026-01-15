@@ -1150,7 +1150,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "certifi", specifier = ">=2026.1.4" },
+    { name = "certifi", specifier = ">=2024.2.2" },
     { name = "fastapi", specifier = ">=0.110" },
     { name = "langchain", specifier = ">=0.2" },
     { name = "langchain-community", specifier = ">=0.0.20" },

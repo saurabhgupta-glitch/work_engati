@@ -4,7 +4,8 @@ from functools import lru_cache
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from dotenv import load_dotenv
+load_dotenv()
 
 class Settings(BaseSettings):
     """Application configuration loaded from environment variables.
@@ -12,7 +13,6 @@ class Settings(BaseSettings):
     NOTE: We intentionally keep this small and explicit to avoid
     hidden configuration.
     """
-
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -21,9 +21,14 @@ class Settings(BaseSettings):
 
     mongodb_uri: str = Field(alias="MONGODB_URI")
 
+    # OpenAI
+    # NOTE: Keep the API key in `.env` / environment, not in code.
+    openai_api_key: str = Field(alias="OPENAI_API_KEY")
+
     # MongoDB Atlas Vector Search details
-    mongodb_db_name: str = "travellive_db"
-    mongodb_collection_name: str = "tour_departure_package"
+    # NOTE: Updated to the new DB/collection names for tour packages.
+    mongodb_db_name: str = "tour_data"
+    mongodb_collection_name: str = "tour_package"
     atlas_vector_index_name: str = "vector_index"
     text_key: str = "content"
     embedding_key: str = "embedding"
